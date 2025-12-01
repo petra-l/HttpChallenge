@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Game1 - 数字解谜</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 0 20px; }
+        .input-area { margin: 30px 0; }
+        input { padding: 8px; width: 200px; font-size: 16px; }
+        button { padding: 8px 20px; margin-left: 10px; cursor: pointer; }
+        .result { margin-top: 20px; font-weight: bold; }
+        .success { color: #28a745; }
+        .hint { color: #6c757d; margin-top: 40px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h2>数字解谜挑战</h2>
+    <div class="input-area">
+        <label>输入整数：</label>
+        <input type="number" id="scoreInput" placeholder="请输入数字">
+        <button onclick="submitNumber()">提交</button>
+    </div>
+    <div class="result" id="result"></div>
+
+    <div class="hint">
+        <p>提示1：提交成功后，打开F12 → Network栏查看请求！</p>
+        <p>提示2：分析响应内容中的规律，找到score=1000对应的sign</p>
+        <p>提示3：访问 success.html?sign=xxx 进入下一关</p>
+    </div>
+
+    <script>
+        // 提交数字的核心函数
+        function submitNumber() {
+            const score = document.getElementById('scoreInput').value.trim();
+            
+            // 验证输入是否为空
+            if (!score) {
+                document.getElementById('result').textContent = "请输入有效数字！";
+                document.getElementById('result').className = "result";
+                return;
+            }
+
+            // 生成sign（规律：zM + Base64(score) + ==）
+            const b64Score = btoa(score);
+            const sign = `zM${b64Score}==`;
+            
+            // 更新页面提示
+            document.getElementById('result').textContent = "提交成功！查看Network栏找规律！";
+            document.getElementById('result').className = "result success";
+            
+            // 发送GET请求到后端/check接口
+            fetch(`http://localhost:5000/check?score=${score}&sign=${sign}`, {
+                method: 'GET',
+                mode: 'cors' // 允许跨域请求
+            })
+            .then(response => response.text())
+            .then(text => {
+                console.log("=== 后端响应内容 ===", text);
+            })
+            .catch(error => {
+                console.error("请求错误：", error);
+            });
+        }
+
+        // 页面加载提示
+        window.onload = () => {
+            console.log("=== 操作指引 ===");
+            console.log("1. 输入任意数字提交，在Network栏查看/check请求的响应");
+            console.log("2. Base64(1000) = 'MTAwMA=='，因此sign = 'zM'+'MTAwMA=='+'=='");
+            console.log("3. 下一关URL：success.html?sign=zMMTAwMA====");
+        };
+    </script>
+</body>
+</html>
