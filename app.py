@@ -8,7 +8,7 @@ app.config['JSON_AS_ASCII'] = False
 # 主页路由：返回前端页面的入口
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory('.', '101.html')
 
 # 校验接口：处理前端的GET请求
 @app.route('/check', methods=['GET'])
@@ -35,4 +35,5 @@ def success():
         return "错误的sign值！", 400
 
 if __name__ == '__main__':
+
     app.run(debug=True, host='0.0.0.0', port=5000)
